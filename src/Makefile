@@ -12,6 +12,7 @@ LD			=	/usr/local/bin/cl65
 SRC		= $(wildcard *.c)
 OBJ		= $(SRC:.c=*.o)
 INC		= $(wildcard *.h)
+ASM		= wait.asm
 #INC	+=	scoreboard.h sound.h
 
 RESOURCE	=
@@ -21,7 +22,7 @@ RESOURCE	=
 all: $(TARGET) $(RESOURCE)
 
 $(TARGET): $(SRC) $(INC)
-	cl65 $(LDFLAGS) -o $@ $(SRC)
+	cl65 $(LDFLAGS) -o $@ $(SRC) $(ASM)
 
 install:
 	cp $(TARGET) $(RESOURCE) ~/x16/

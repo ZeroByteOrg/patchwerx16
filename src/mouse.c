@@ -8,6 +8,7 @@
 #define MOUSE_GET		0xFF6B	// Kernal API location
 
 mouse_state mouse = {};
+mouse_state click = {};
 
 void mouse_hide()
 {
@@ -26,6 +27,8 @@ void mouse_show()
 void mouse_get()
 {
 	mouse.previous = mouse.buttons;
+	click.buttons  = 0;	// clear previous click snapshot
+
 	// call Kernal MOUSE_GET
 	asm("ldx #%b", ZP_RETURNS);
 	asm("jsr %w",  MOUSE_GET);
@@ -35,6 +38,8 @@ void mouse_get()
 	mouse.x = (*(int16_t*) ZP_RETURNS);
 	mouse.y = (*(int16_t*) (ZP_RETURNS+2));
 	mouse.pressed = (mouse.buttons & ~mouse.previous) & 0x07;
+	if (mouse.pressed)
+		click=mouse;
 }
 
 void mouse_waitrelease(const uint8_t mask)

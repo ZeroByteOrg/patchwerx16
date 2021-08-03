@@ -8,6 +8,10 @@
 #include "patchwerx16.h"
 
 #define DRAGBOX	4
+#define CLICK_DELAY1	45
+#define CLICK_DELAY2	7
+
+extern void wait(); // pauses until next IRQ. function is in wait.asm
 
 widget_t widget[MAX_WIDGETS] = {};
 
@@ -23,6 +27,8 @@ void dragedit(widget_t *p_widget,int16_t *p_axis,const int16_t p_anchor,const ui
 	   const int16_t startvalue = p_widget->value;
 
 	do {
+		// doesn't it suck that we don't have direct dX/dY mouse reporting
+		// from the Kernal?
 		newvalue = startvalue + (p_anchor - *p_axis);
 		set_widget(p_widget, newvalue);
 		mouse_get();
@@ -35,52 +41,75 @@ void clickedit(widget_t *p_widget, const int8_t delta)
 	set_widget(p_widget, (int8_t)(p_widget->value + delta));
 }
 
-void handle_click(const uint8_t p_button)
+void handle_click()
 {
 	static widget_t *w;
-	volatile uint8_t count = 256;
-	volatile int16_t x = mouse.x;
-	volatile int16_t y = mouse.y;
+	static mouse_state m_click;
+	volatile int16_t count = 0;
+	volatile uint8_t first = 1;
+	volatile uint8_t draggable = 1;
 
-	w = find_widget(mouse.x,mouse.y);
+	w = find_widget(m_click.x,m_click.y);
 	if (w == (widget_t*)0x0000)
-	{
-		mouse_waitrelease(p_button);
 		return;
-	}
+	m_click = click;
 
-	while ((mouse.buttons & p_button) && count > 0)
-	{
-		--count;
+	// filter out multi-clicks, priority = Left, Right, Middle
+	if (m_click.buttons & MBUTTON_L)
+		m_click.buttons = MBUTTON_L;
+	else if (m_click.buttons & MBUTTON_R)
+		m_click.buttons = MBUTTON_R;
+	else
+		m_click.buttons = MBUTTON_M;
+
+	do {
 		mouse_get();
 		// if mouse leaves DRAGBOX, go into drag mode
-		if (abs(mouse.x - x) > DRAGBOX)
+		if ((abs(mouse.x - m_click.x) > DRAGBOX) && draggable)
 		{
 			// dragedit should run until mouse button is released
-			dragedit(w,&mouse.x,x,p_button);
-			count = 1; // ensure count >0 so we don't also process a click edit
+			dragedit(w,&mouse.x,m_click.x,m_click.buttons);
+			break;
 		}
-		else if (abs(mouse.y - y) > DRAGBOX)
+		else if ((abs(mouse.y - m_click.y) > DRAGBOX) && draggable)
 		{
-			dragedit(w,&mouse.y,y,p_button);
-			count = 1;
+			dragedit(w,&mouse.y,m_click.y,m_click.buttons);
+			break;
 		}
-	}
-	if (count==0)
-		clickedit(w,p_button == MBUTTON_L ? -1 : 1);
+		--count;
+		if (count < 0)
+		{
+			if (first)
+			{
+				first = 0;
+				count = CLICK_DELAY1;
+			}
+			else
+			{
+				draggable = 0;
+				count = CLICK_DELAY2;
+			}
+			clickedit(w,m_click.buttons == MBUTTON_L ? -1 : 1);
+		}
+		else
+		{
+			wait();
+		}
+	} while (mouse.buttons & m_click.buttons);
 }
 
 void program_loop()
 {
+	uint8_t c;
 	mouse_show();
 	while (1)
 	{
 		mouse_get();
-		if (mouse.pressed & MBUTTON_L)
-			handle_click(MBUTTON_L);
-		else if (mouse.pressed & MBUTTON_R)
-			handle_click(MBUTTON_R);
-		else if (mouse.pressed & MBUTTON_M)
-			return;
+		if (click.buttons)
+		{
+			c = ~ vpeek(159);
+			vpoke(c,159);
+			handle_click();
+		}
 	}
 }

@@ -15,6 +15,7 @@ typedef struct mouse_state {
 } mouse_state;
 
 extern mouse_state mouse;
+extern mouse_state click;
 
 extern void mouse_hide();
 extern void mouse_show();
