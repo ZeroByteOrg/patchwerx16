@@ -20,19 +20,21 @@ void draw_screen()
 	draw_widget(&widget[0]);
 }
 
-void dragedit(widget_t *p_widget,int16_t *p_axis,const int16_t p_anchor,const uint8_t p_button)
+void dragedit(widget_t *p_widget,int16_t *p_delta,const uint8_t p_button)
 {
-	//volatile int16_t delta;
-	volatile int16_t newvalue;
-	   const int16_t startvalue = p_widget->value;
+	const int16_t startvalue = p_widget->value;
 
 	do {
-		// doesn't it suck that we don't have direct dX/dY mouse reporting
-		// from the Kernal?
-		newvalue = startvalue + (p_anchor - *p_axis);
-		set_widget(p_widget, newvalue);
+		set_widget(p_widget, p_widget->value + *p_delta);
 		mouse_get();
+		#if(0)
 		// TODO: check keyboard for ESC key to abort the edit
+		if (0) // if new-key-pressed == ESC
+		{
+			set_widget(p_widget, startvalue);
+			return;
+		}
+		#endif
 	} while (mouse.buttons & p_button);
 }
 
@@ -44,7 +46,7 @@ void clickedit(widget_t *p_widget, const int8_t delta)
 void handle_click()
 {
 	static widget_t *w;
-	static mouse_state m_click;
+	static mouse_click m_click;
 	volatile int16_t count = 0;
 	volatile uint8_t first = 1;
 	volatile uint8_t draggable = 1;
@@ -61,40 +63,33 @@ void handle_click()
 		m_click.buttons = MBUTTON_R;
 	else
 		m_click.buttons = MBUTTON_M;
-
 	do {
 		mouse_get();
 		// if mouse leaves DRAGBOX, go into drag mode
-		if ((abs(mouse.x - m_click.x) > DRAGBOX) && draggable)
-		{
-			// dragedit should run until mouse button is released
-			dragedit(w,&mouse.x,m_click.x,m_click.buttons);
-			break;
-		}
-		else if ((abs(mouse.y - m_click.y) > DRAGBOX) && draggable)
-		{
-			dragedit(w,&mouse.y,m_click.y,m_click.buttons);
-			break;
+		if (draggable) {
+			if (abs(mouse.x - m_click.x) > DRAGBOX)	{
+				// dragedit should run until mouse button is released
+				dragedit(w,&mouse.dx,m_click.buttons);
+				break;
+			}
+			else if (abs(mouse.y - m_click.y) > DRAGBOX) {
+				dragedit(w,&mouse.dy,m_click.buttons);
+				break;
+			}
 		}
 		--count;
-		if (count < 0)
-		{
-			if (first)
-			{
+		if (count < 0) {
+			if (first) {
 				first = 0;
 				count = CLICK_DELAY1;
 			}
-			else
-			{
+			else {
 				draggable = 0;
 				count = CLICK_DELAY2;
 			}
 			clickedit(w,m_click.buttons == MBUTTON_L ? -1 : 1);
 		}
-		else
-		{
-			wait();
-		}
+		else wait();
 	} while (mouse.buttons & m_click.buttons);
 }
 

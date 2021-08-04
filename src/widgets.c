@@ -4,6 +4,7 @@
 widget_t *find_widget(const uint16_t x, const uint16_t y)
 {
 	//return (widget_t*)0x0000;
+
 	return &widget[0];
 }
 

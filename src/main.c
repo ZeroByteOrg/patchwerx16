@@ -36,6 +36,8 @@ typedef struct x16_state {
 
 uint8_t system_init()
 {
+	// TODO: setup VERA
+	ym_init();
 	init_widgits();
 	draw_screen();
 	return 1;
@@ -51,8 +53,12 @@ void init_widgits()
 
 void system_shutdown()
 {
+	ym_silence(0xff); // values not 0-7 = silence all.
+	// clear the key buffer
 	while (kbhit())
 		cgetc();
+	// wait for keypress prior to exit
+	// (cc65's underlying code clears the screen when done - grr)
 	while (!kbhit()) {}
 }
 

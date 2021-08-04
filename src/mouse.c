@@ -8,7 +8,7 @@
 #define MOUSE_GET		0xFF6B	// Kernal API location
 
 mouse_state mouse = {};
-mouse_state click = {};
+mouse_click click = {};
 
 void mouse_hide()
 {
@@ -26,6 +26,7 @@ void mouse_show()
 
 void mouse_get()
 {
+	static uint16_t x, y;
 	mouse.previous = mouse.buttons;
 	click.buttons  = 0;	// clear previous click snapshot
 
@@ -35,11 +36,19 @@ void mouse_get()
 	// Kernal returns buttons in accumulator. Move it to the struct.
 	asm("ldy #%b", offsetof(mouse_state, buttons));
 	asm("sta %v,y", mouse);
-	mouse.x = (*(int16_t*) ZP_RETURNS);
-	mouse.y = (*(int16_t*) (ZP_RETURNS+2));
-	mouse.pressed = (mouse.buttons & ~mouse.previous) & 0x07;
-	if (mouse.pressed)
-		click=mouse;
+
+	x = (*(int16_t*) ZP_RETURNS);
+	y = (*(int16_t*) (ZP_RETURNS+2));
+	mouse.dx = x - mouse.x;
+	mouse.dy = y - mouse.y;
+	mouse.x = x;
+	mouse.y = y;
+	click.buttons = (mouse.buttons & ~mouse.previous) & 0x07;
+	if (click.buttons)
+	{
+		click.x = mouse.x;
+		click.y = mouse.y;
+	}
 }
 
 void mouse_waitrelease(const uint8_t mask)

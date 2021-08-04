@@ -8,14 +8,18 @@
 #define MBUTTON_M	4
 
 typedef struct mouse_state {
-	int16_t	x, y;
+	int16_t	x, y, dx, dy;
 	uint8_t	buttons,	// current button states
-			previous,	// previous button states
-			pressed;	// buttons pressed on this check
+			previous;	// previous button states
 } mouse_state;
 
+typedef struct mouse_click {
+	int16_t x, y;
+	uint8_t buttons;
+} mouse_click;
+
 extern mouse_state mouse;
-extern mouse_state click;
+extern mouse_click click;
 
 extern void mouse_hide();
 extern void mouse_show();
