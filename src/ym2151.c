@@ -25,21 +25,17 @@ void ym_silence(const uint8_t voice)
 	uint8_t i, op;
 
 	uint8_t first = voice;
-	uint8_t last  = voice;
+	uint8_t last  = voice+1;
 
-	if (voice > 7)
-	{
-		first = 0;
-		last  = 8;
-	}
+	if (voice > 7) 	{ first = 0; last  = 8;	}
 
 	for(i=first ; i<last ; i++)
 	{
 		// loop checks >= 0xe0 because op is 8bit thus can never be > 0xff
-		for (op=0xe0+i; op >= 0xe0 ; op++)
+		for (op=0xe0+i; op >= 0xe0 ; op+=8)
 			writeYM(op, 0x0f);			// set max RR for all 4 ops
 		writeYM(0x08,i); 				// keyUP
-		for (op=0xe0+i; op >= 0xe0 ; op++)
+		for (op=0xe0+i; op >= 0xe0 ; op+=8)
 			writeYM(op, getReg(op));	// restore the D1L+RR value
 	}
 }
@@ -53,7 +49,7 @@ void writeYM(uint8_t a, uint8_t d)
 	YMI.data = d;
 }
 
-uint8_t getReg(uint8_t p_reg)
+uint8_t getReg(const uint8_t p_reg)
 {
 	static uint8_t group, v, o, val, reg;
 
