@@ -1,6 +1,13 @@
 #include <cx16.h>
 #include "widgets.h"
 
+extern void init_widgit(widget_t *widget, void *clickfunc, void *drawfunc, uint8_t *value)
+{
+	widget->onClick = (clickhandler)clickfunc;
+	widget->draw    = (renderer)drawfunc;
+	widget->value	= value;
+}
+
 widget_t *find_widget(const uint16_t x, const uint16_t y)
 {
 	//return (widget_t*)0x0000;
@@ -8,10 +15,6 @@ widget_t *find_widget(const uint16_t x, const uint16_t y)
 	return &widget[0];
 }
 
-void draw_widget(widget_t *p_widget)
-{
-	vpoke(p_widget->value,p_widget->vram_loc);
-}
 
 void set_widget(widget_t *p_widget, int16_t value)
 {
@@ -20,7 +23,7 @@ void set_widget(widget_t *p_widget, int16_t value)
 		value = 0;
 	else if (value > 255)
 		value = 255;
-	p_widget->value = value;
-	draw_widget(p_widget);
+	*p_widget->value = value;
+	p_widget->draw(&p_widget);
 	// TODO: update the YM with this value
 }

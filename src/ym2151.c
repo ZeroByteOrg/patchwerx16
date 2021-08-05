@@ -3,7 +3,7 @@
 #define YMI (*(ym_interface*) YM_BASE)
 
 // declare hidden functions so the "exported" ones can use them.
-uint8_t getReg(uint8_t p_reg);
+uint8_t getReg(const uint8_t p_reg);
 void writeYM(uint8_t a, uint8_t d);
 
 static ym_state YM = {};
