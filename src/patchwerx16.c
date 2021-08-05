@@ -14,18 +14,19 @@
 extern void wait(); // pauses until next IRQ. function is in wait.asm
 
 widget_t widget[MAX_WIDGETS] = {};
+uint8_t testvalue = 30;
 
 void draw_screen()
 {
-	draw_widget(&widget[0]);
+	widget[0].draw(&widget[0]);
 }
 
 void dragedit(widget_t *p_widget,int16_t *p_delta,const uint8_t p_button)
 {
-	const int16_t startvalue = p_widget->value;
+	const int16_t startvalue = *p_widget->value;
 
 	do {
-		set_widget(p_widget, p_widget->value + *p_delta);
+		set_widget(p_widget, *p_widget->value + *p_delta);
 		mouse_get();
 		#if(0)
 		// TODO: check keyboard for ESC key to abort the edit

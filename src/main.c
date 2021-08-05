@@ -47,8 +47,9 @@ uint8_t system_init()
 
 void init_widgits()
 {
-	init_widgit(&widget[0],;
+	init_widgit(&widget[0],&test_clickhandler, &test_draw, &testvalue);
 	widget[0].color = 0x41;
+	widget[0].vram_loc = (256*4 + 80);
 }
 
 void system_shutdown()

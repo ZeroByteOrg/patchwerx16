@@ -23,8 +23,12 @@ enum widget_type {
 	WT_TEXT
 };
 
-typedef void (*clickhandler)(void*,void*,uint8_t *);
+typedef void (*clickhandler)(void*,void*);
+	// parameters = pointer to the widget, the click
+	// there WAS a uint8_t* as the third operand - what WAS it???
+
 typedef void (*renderer)(void*);
+	// parameter = pointer to the widget
 
 typedef struct widget_t {
 	enum widget_state state;
