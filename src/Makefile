@@ -33,9 +33,10 @@ clean:
 run: all
 	@$(EMU) -prg $(TARGET) -run -sym $(SYMFILE)
 
-test: test.c
-	cl65 -t cx16 -O -o TEST test.c
-	x16emu -prg TEST -debug
+test: test.cc
+	@cc65 -t cx16 -O test.cc
+	@cl65 -t cx16 -o TEST.PRG test.s
+	@x16emu -prg TEST.PRG -debug -run
 
 pkg: $(PKG)
 

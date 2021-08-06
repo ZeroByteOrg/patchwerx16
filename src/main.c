@@ -27,6 +27,8 @@
 //#include <cx16.h>
 #include "patchwerx16.h"
 #include "widgets.h"
+#include "ym2151.h"
+#include "callbacks.h"
 
 void init_widgits();
 
@@ -43,13 +45,14 @@ uint8_t system_init()
 	return 1;
 }
 
+/*
 void init_widgits()
 {
-	widget[0].style = W_KNOB_1DIGITR;
-	widget[0].value = 32;
+	init_widgit(&widget[0],&test_clickhandler, &test_draw, &testvalue);
 	widget[0].color = 0x41;
-	widget[0].vram_loc	= 0; //( 2*40 + 256*20 );
+	widget[0].vram_loc = (256*4 + 80);
 }
+*/
 
 void system_shutdown()
 {
