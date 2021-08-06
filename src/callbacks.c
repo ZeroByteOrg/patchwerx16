@@ -1,9 +1,12 @@
 #include <stdint.h>
 #include <cx16.h>
 #include <stdlib.h>	//abs()
-#include "mouse.h"
+
+#include "patchwerx16.h"
 #include "callbacks.h"
 #include "widgets.h"
+#include "mouse.h"
+
 
 #define DRAGBOX	4
 #define CLICK_DELAY1	45
@@ -73,12 +76,19 @@ CB_TYPE click_test(uint8_t id)
 
 CB_TYPE render_test(uint8_t id)
 {
+	/*
+	vpoke(widget.value[id],widget.vram_loc[id]);
+	vpoke(widget.value[id],widget.vram_loc[id]+2);
+	vpoke(widget.value[id],widget.vram_loc[id]+256);
+	vpoke(widget.value[id],widget.vram_loc[id]+256 + 2);
+	*/
 	vpoke(widget.value[id],widget.vram_loc[id]);
 	return (CB_TYPE)0;
 }
 
-CB_TYPE mod_test(uint8_t id, int16_t p_val)
+CB_TYPE mod_test(uint8_t id, int16_t oldvalue)
 {
+	id = oldvalue; // just to shut up the compiler warnings....
 	return (CB_TYPE)0;
 }
 

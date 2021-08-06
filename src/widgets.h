@@ -2,6 +2,7 @@
 #define __WIDGETS_H__
 
 #include <stdint.h>
+#include "patchwerx16.h" // defines MAX_WIDGETS to actual value
 #include "callbacks.h"
 
 #ifndef MAX_WIDGETS
@@ -28,10 +29,10 @@ typedef struct widget_set {
 	uint8_t value[MAX_WIDGETS];
 	uint8_t color[MAX_WIDGETS];
 	uint16_t vram_loc[MAX_WIDGETS];
-	uint16_t x[MAX_WIDGETS];
-	uint16_t w[MAX_WIDGETS];
-	uint16_t y[MAX_WIDGETS];
-	uint16_t h[MAX_WIDGETS];
+	uint16_t x[MAX_WIDGETS];	// left of the clickbox
+	uint16_t x1[MAX_WIDGETS];	// right of the clickbox
+	uint16_t y[MAX_WIDGETS];	// top of the clickbox
+	uint16_t y1[MAX_WIDGETS];	// bottom of the clickbox
 	uint8_t min[MAX_WIDGETS];
 	uint8_t max[MAX_WIDGETS];
 	cb_clickhandler onClick[MAX_WIDGETS];
@@ -44,7 +45,6 @@ typedef struct widget_set {
 
 extern widget_set widget;
 
-extern void init_widgits();
 extern int16_t find_widget(const uint16_t x, const uint16_t y);
 extern void set_widget(uint8_t id, int16_t value);
 extern void inc_widget(uint8_t id, uint8_t delta);
