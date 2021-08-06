@@ -49,6 +49,17 @@ void mouse_get()
 		click.x = mouse.x;
 		click.y = mouse.y;
 	}
+
+/*	TODO: adapt this filter into this routine
+	// filter out multi-clicks, priority = Left, Right, Middle
+	if (m_click.buttons & MBUTTON_L)
+		m_click.buttons = MBUTTON_L;
+	else if (m_click.buttons & MBUTTON_R)
+		m_click.buttons = MBUTTON_R;
+	else
+		m_click.buttons = MBUTTON_M;
+*/
+
 }
 
 void mouse_waitrelease(const uint8_t mask)

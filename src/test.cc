@@ -1,34 +1,39 @@
 #include <stdio.h>
 #include <stdint.h>
 
-typedef uint8_t (*handler)(uint8_t);
+typedef uint8_t (*fptr)(uint8_t);
 
-typedef struct foo_t {
-	const char* msg;
-	handler doit;
-} foo_t;
-
-uint8_t answer(uint8_t f)
+uint8_t printd(uint8_t x)
 {
-	printf("the answer is %d\n",f);
+	printf("%d\n",x);
 	return 0;
 }
 
-uint8_t question(uint8_t f)
+uint8_t printx(uint8_t y)
 {
-	printf("what is 6 * %d?\n",f);
+	printf("$%2x\n",y);
 	return 0;
 }
 
-foo_t foo;
+uint8_t inc(uint8_t i)
+{
+	return i+1;
+}
+
+struct foo {
+	fptr f[3];
+} foo;
 
 int main()
 {
-	foo.msg = "hello world.";
-	foo.doit = question;
-	foo.doit(7);
-	foo.doit = answer;
-	foo.doit(42);
+	foo.f[0] = printd;
+	foo.f[1] = printx;
+	foo.f[2] = inc;
+	foo.f[0](0x36);
+	foo.f[1](0x36);
+	foo.f[0](f[2](0x36));
+
+
 	while(1) {}
 	return 0;
 }
