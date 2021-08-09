@@ -11,14 +11,20 @@
 	#endif
 #endif
 
-enum ym_param {
+typedef enum ym_param {
+	// global parameters
 	YMVAL_TEST,YMVAL_KON,YMVAL_NE,YMVAL_NFRQ,YMVAL_CLKA1,YMVAL_CLKA2,
 	YMVAL_CLK2,YMVAL_CSM,YMVAL_TRESET,YMVAL_IRQEN,YMVAL_LOADT,YMVAL_LFRQ,
-	YMVAL_PMD,YMVAL_AMD,YMVAL_CT,YMVAL_W,YMVAL_R,YMVAL_L,YMVAL_FB,YMVAL_CONECT,
-	YMVAL_KC,YMVAL_KF,YMVAL_PMS,YMVAL_AMS,YMVAL_DT1,YMVAL_MUL,YMVAL_TL,
-	YMVAL_KS,YMVAL_AR,YMVAL_AMSEN,YMVAL_D1R,YMVAL_DT2,YMVAL_D2R,YMVAL_D1L,
-	YMVAL_RR
-};
+	YMVAL_PMD,YMVAL_AMD,YMVAL_CT,YMVAL_W,
+	
+	// per-channel parameters
+	YMVAL_R,YMVAL_L,YMVAL_FB,YMVAL_CONECT,
+	YMVAL_KC,YMVAL_KF,YMVAL_PMS,YMVAL_AMS,
+	
+	// per-operator parameters
+	YMVAL_DT1,YMVAL_MUL,YMVAL_TL,YMVAL_KS,YMVAL_AR,YMVAL_AMSEN,
+	YMVAL_D1R,YMVAL_DT2,YMVAL_D2R,YMVAL_D1L,YMVAL_RR
+} ym_param;
 
 typedef struct ym_interface {
 	uint8_t address, data;
@@ -35,13 +41,6 @@ typedef struct ym_chan {
 		r,l,fb,connect,kc,kf,pms,ams;
 		ym_oper op[4];
 } ym_chan;
-
-/*
-typedef struct ym_global {
-	uint8_t
-		ne, nfrq, lfrq, w;
-} ym_lfo;
-*/
 
 typedef struct ym_patch {
 	ym_chan	chan;
@@ -62,16 +61,27 @@ typedef struct ym_patchregs {
 
 extern ym_state YM;
 
-extern void ym_init();
 
+extern void ym_init();
+// initializaes the ym_state and the real HW
+
+extern void ym_silence(const uint8_t voice);
 // silences the voices but leaves the YM in the final state so that
 // the user may plunk around with it in BASIC or whatever afterwards.
 // voice=0-7 -> silence just that voice, all other values = silence all voices
-extern void ym_silence(const uint8_t voice);
 
-extern void ym_set_voice(const uint8_t voice, const ym_patch *patch);
-extern void ym_update_voice(const uint8_t voice, const ym_patch *patch);
+
+
+extern void ym_apply_patch(const uint8_t voice, const ym_patch *patch);
+// configures voice using a 26-byte patch. Applies to ym_state and real HW.
+
 extern void ym_get_patchregs(const uint8_t voice, const ym_patchregs *regs);
+// configures a 26-byte patch from the specified voice in ym_state.
+
+extern void ym_setparam_global(ym_param param, uint8_t val);
+extern void ym_setparam_chan(ym_param param, uint8_t chan, uint8_t val);
+extern void ym_setparam_oper(ym_param param, uint8_t chan, uint8_t op, uint8_t val);
+
 
 // maybe these don't need to be exported to the rest of the project?
 extern void ym_patchtoregs(ym_patch *patch, ym_patchregs *regs);

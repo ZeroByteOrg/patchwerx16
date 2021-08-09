@@ -68,3 +68,7 @@ void mouse_waitrelease(const uint8_t mask)
 		mouse_get();
 }
 
+void mouse_init()
+{
+}
+

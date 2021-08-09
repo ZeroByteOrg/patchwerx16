@@ -25,5 +25,6 @@ extern void mouse_hide();
 extern void mouse_show();
 extern void mouse_get();
 extern void mouse_waitrelease(const uint8_t mask);
+extern void mouse_init();
 
 #endif

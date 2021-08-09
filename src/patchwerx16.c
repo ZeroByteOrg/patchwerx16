@@ -3,8 +3,8 @@
 #include <conio.h>
 #include <stdlib.h>	//abs()
 
-//#define MAXWIDGETS 3
-#include "widgets.h"
+//#define MAXWIDGITS 3
+#include "widgits.h"
 #include "patchwerx16.h"
 #include "ym2151.h"
 #include "callbacks.h"
@@ -13,74 +13,57 @@ extern void wait(); // pauses until next IRQ. function is in wait.asm
 
 void draw_screen()
 {
-	widget.draw[0](0); //<===== this is crashing the program....
+	widgit.draw[0](0); //<===== this is crashing the program....
 }
 
-// TODO: impliment a routine set_widget() to intialze the basics...
+// TODO: impliment a routine set_widgit() to intialze the basics...
 // Params are the very basics: clickbox x,y,w,h
 // It should then point all handler references to null handlers;
 //
-// Thought: Maybe I should move clickboxes outside of the widget struct...
-// Then it would be possible to have non-clickable widgets that can still be
+// Thought: Maybe I should move clickboxes outside of the widgit struct...
+// Then it would be possible to have non-clickable widgits that can still be
 // triggered to update their appearance or whatever...
-void init_widgets()
+void setup_widgits()
 {
 	int16_t id, box;
-	widget.count = 0;
-	clickbox.count = 0;
 	id = add_widgit(&YM.voice[0].op[0].tl);
-	box = add_clickbox(40*8, 4*8, 16, 16);
+	box = add_clickbox(20*16, 4*16, 16*3, 16);
 	if ((id < 0)||(box < 0)) return;
 	attach_clickbox(box,id);
-	widget.draw[id] = &render_test;
-	widget.color[id] = 1 << 4; // pre-shift the color palette # into
-	widget.min[id] = 0;       //proper bits for tile mode display
-	widget.max[id] = 0x7f;
-	widget.vram_loc[id] = 0x4000 + (40 + 128*4); // col 40, row 4
-	widget.state[id] = WS_ENABLED;
-	widget.l_click[id] = dec_repeat_drag;
-	widget.r_click[id] = inc_repeat_drag;
+	widgit.draw[id] = render_test;
+	widgit.color[id] = 1 << 4; // pre-shift the color palette # into
+	widgit.min[id] = 0;       //proper bits for tile mode display
+	widgit.max[id] = 0x7f;
+	widgit.vram_loc[id] = 0x4000 + (40 + 128*4); // col 40, row 4
+	widgit.state[id] = WS_ENABLED;
+	widgit.l_click[id] = dec_repeat_drag;
+	widgit.r_click[id] = inc_repeat_drag;
+}
+
+void debug_showclick(int16_t id)
+{
+	printf("click: x=%03d y=%03d b=%02x id=%d\n",click.x, click.y, click.buttons,id);
 }
 
 uint8_t patchwerx_init()
 {
+	widgit_sysinit();
+	setup_widgits();
+	draw_screen();
 	return 1;
 }
 
 void program_loop()
 {
-
-	static uint8_t c;
-	static int16_t id;
 	mouse_show();
 	while (1)
 	{
-		mouse_get();
-		if (click.buttons)
-		{
-			// filter out multi-clicks, priority = L > R > M
-			if (click.buttons & MBUTTON_L)
-				click.buttons = MBUTTON_L;
-			else if (click.buttons & MBUTTON_R)
-				click.buttons = MBUTTON_R;
-			else
-				click.buttons = MBUTTON_M;
-			// tmp: toggle the top-right char's color to indicate clicks...
-			c = ~ vpeek(159);
-			vpoke(c,159);
-			id = get_clickbox(click.x,click.y);
-			if (id >= 0)
-				switch (click.buttons) {
-					case MBUTTON_L:
-						widget.l_click[id];
-						break;
-					case MBUTTON_R:
-						widget.r_click[id];
-						break;
-					case MBUTTON_M:	
-						widget.m_click[id];
-						break;
-				}
-		}
+		mouse_get(); // rename to get_input()?
+		
+		// program gets first bite at handling clicks.
+		// if it wants to consume the click and not process the widgits,
+		// then just don't call widgits_process_click();
+		if (click.buttons) widgits_process_click();
+		if (kbd.pressed) widgits_process_key();
 	}
 }

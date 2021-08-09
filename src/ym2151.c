@@ -107,4 +107,40 @@ uint8_t getReg(const uint8_t p_reg)
 	}
 }
 
+/*
+ *  >>>>>>>>>> THIS IS WHERE I WAS WORKING <<<<<<<<<<<<<< //
+ *  notes to self: I think I may actually not do it this way, but
+ * just make a few fn's to return pointers to parameters in the ym_state
+ * along with the corresponding enum?
+*/
 
+void ym_setparam_global(ym_param param, uint8_t val)
+{
+	// ne, nfrq, lfrq, w, pmd, amd;
+
+	switch (param) {
+	case YMVAL_NE:
+		break;
+	case YMVAL_NFRQ:
+		break;
+	case YMVAL_LFRQ:
+		break;
+	case YMVAL_W:
+		break;
+	case YMVAL_PMD:
+		break;
+	case YMVAL_AMD:
+		break;
+	case default:
+		//return 0;
+		return;
+	}
+}
+
+void ym_setparam_chan(ym_param param, uint8_t chan, uint8_t val)
+{
+}
+
+void ym_setparam_oper(ym_param param, uint8_t chan, uint8_t op, uint8_t val)
+{
+}	

@@ -27,9 +27,9 @@
 #include <cx16.h>		// kernal access functions
 
 #include "patchwerx16.h"
-#include "widgets.h"
+#include "widgits.h"
 #include "ym2151.h"
-#include "callbacks.h"
+//#include "handlers.h"
 
 
 typedef struct x16_state {
@@ -49,7 +49,7 @@ void init_vera()
 	
  	cbm_k_bsout(CH_FONT_UPPER); 	//undo mixed-case mode that cc65 sets by default
 
-	// Apply Commander X16 default video settings to layer1
+	// Apply Commander X16 default video settings to layer 0
 	VERA.layer0.config = 0x60;
 	VERA.layer0.mapbase = 0x00;
 	VERA.layer0.tilebase = 0x7c;
@@ -61,7 +61,7 @@ void init_vera()
 	VERA.display.hscale = 0x80; // ensure display = 640x480
 	VERA.display.vscale = 0x80;
 	
-	VERA.control = 2;	// swicht DCSEL to 1 for access to these regs
+	VERA.control = 2;	// switch DCSEL to 1 for access to these regs
 	VERA.display.hstart = 0;	// ensure full-screen drawing
 	VERA.display.hstop = 0xa0;
 	VERA.display.vstart = 0;
@@ -94,7 +94,6 @@ void init_vera()
 	for (i=0 ; i < (64 * 16*16 / 2) ; i++)
 		VERA.data0 = 0;
 		
-	VERA.display.video = 0x71;
 }
 
 uint8_t system_init()
@@ -104,11 +103,11 @@ uint8_t system_init()
 	asm("cli");
 	
 	// load in the assets....
-	vload("gfx.bin",1,0);			//load widget graphics to VRAM:0x10000 
-	vload("palette.bin",1,0xfa00);	//load palette
+	vload("gfx.bin",1,0);			// load widgit graphics to VRAM:0x10000 
+	vload("palette.bin",1,0xfa00);	// load palette
+	VERA.display.video = 0x71;		// enable layer1 display
 	ym_init();
-	init_widgets();
-	draw_screen();
+	patchwerx_init();
 	return 1;
 }
 
@@ -129,7 +128,7 @@ void system_get_state(x16_state *p_state)
 
 	state = *p_state;
 
-	state.vera1 = 1;
+	state.vera1 = 1;  // probably just to get rid of unused param warnings???
 }
 
 void system_restore_state(x16_state *p_state)
