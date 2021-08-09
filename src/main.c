@@ -32,8 +32,6 @@
 #include "callbacks.h"
 
 
-void init_widgits();
-
 typedef struct x16_state {
 	uint8_t	vera1;
 } x16_state;
@@ -109,19 +107,10 @@ uint8_t system_init()
 	vload("gfx.bin",1,0);			//load widget graphics to VRAM:0x10000 
 	vload("palette.bin",1,0xfa00);	//load palette
 	ym_init();
-	init_widgits();
+	init_widgets();
 	draw_screen();
 	return 1;
 }
-
-/*
-void init_widgits()
-{
-	init_widgit(&widget[0],&test_clickhandler, &test_draw, &testvalue);
-	widget[0].color = 0x41;
-	widget[0].vram_loc = (256*4 + 80);
-}
-*/
 
 void system_shutdown()
 {

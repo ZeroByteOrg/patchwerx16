@@ -3,7 +3,7 @@
 #include <conio.h>
 #include <stdlib.h>	//abs()
 
-#include "mouse.h"
+//#define MAXWIDGETS 3
 #include "widgets.h"
 #include "patchwerx16.h"
 #include "ym2151.h"
@@ -23,20 +23,23 @@ void draw_screen()
 // Thought: Maybe I should move clickboxes outside of the widget struct...
 // Then it would be possible to have non-clickable widgets that can still be
 // triggered to update their appearance or whatever...
-void init_widgits()
+void init_widgets()
 {
-	int16_t id = add_widgit(&YM.voice[0].op[0].tl);
-	int16_t box = add_clickbox(40*8, 4*8, 16, 16);
+	int16_t id, box;
+	widget.count = 0;
+	clickbox.count = 0;
+	id = add_widgit(&YM.voice[0].op[0].tl);
+	box = add_clickbox(40*8, 4*8, 16, 16);
 	if ((id < 0)||(box < 0)) return;
 	attach_clickbox(box,id);
-//	widget.draw[id] = &render_test;
+	widget.draw[id] = &render_test;
 	widget.color[id] = 1 << 4; // pre-shift the color palette # into
 	widget.min[id] = 0;       //proper bits for tile mode display
 	widget.max[id] = 0x7f;
 	widget.vram_loc[id] = 0x4000 + (40 + 128*4); // col 40, row 4
 	widget.state[id] = WS_ENABLED;
-//	widget.l_click[id] = &dec_repeat_drag;
-//	widget.r_click[id] = &inc_repeat_drag;
+	widget.l_click[id] = dec_repeat_drag;
+	widget.r_click[id] = inc_repeat_drag;
 }
 
 uint8_t patchwerx_init()

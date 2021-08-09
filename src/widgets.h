@@ -3,10 +3,12 @@
 
 #include <stdint.h>
 #include "patchwerx16.h" // defines MAX_WIDGETS to actual value
-#include "callbacks.h"
+#include "mouse.h"
+
+//#include "callbacks.h"
 
 #ifndef MAX_WIDGETS
-#define MAX_WIDGETS	2
+#define MAX_WIDGETS	1
 #endif
 
 

@@ -89,6 +89,8 @@ void dec_repeat_drag(uint8_t id)
 
 void render_test(uint8_t id)
 {
+//return;
+//#if(0)
 	uint8_t color = widget.color[id];
 	uint8_t value = *(uint8_t*)widget.value[id];
 	uint8_t range = widget.max[id]-widget.min[id];
@@ -107,4 +109,5 @@ void render_test(uint8_t id)
 	VERA.data0 = color;
 	VERA.data0 = value & 0x0f; // low hex nybble
 	VERA.data0 = color;
+//#endif
 }

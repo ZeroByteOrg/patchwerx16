@@ -1,10 +1,13 @@
-#include <cx16.h>
+//#include <cx16.h>
 
 #include "widgets.h"
 
 widget_set widget = {};
 clickbox_set clickbox = {};
 
+
+
+#pragma warn (unused-param,push,off)
 void null_clickhandler(uint8_t id)
 {
 }
@@ -12,14 +15,16 @@ void null_clickhandler(uint8_t id)
 void null_draw(uint8_t id)
 {
 }
+#pragma warn (unused-param,pop) 
 
 
 uint16_t add_widgit(uint8_t *val)
 {
-	uint8_t id = widget.count+1;
-	if (id > MAX_WIDGETS)
+	static uint8_t id;
+	id = widget.count;
+	if (id >= MAX_WIDGETS)
 		return -1;
-	widget.count = id;
+	++widget.count;
 	widget.value[id] = val;
 	widget.draw[id] = null_draw;
 	widget.l_click[id] = null_clickhandler;
@@ -32,8 +37,9 @@ uint16_t add_widgit(uint8_t *val)
 extern uint16_t add_clickbox(const uint16_t x, const uint16_t y, 
 						    const uint16_t w, const uint16_t h)
 {
-	uint8_t id = clickbox.count+1;
-	if (id == MAX_WIDGETS)
+	static uint8_t id;
+	id = clickbox.count;
+	if (id >= MAX_WIDGETS)
 		return -1;
 	++clickbox.count;
 	clickbox.x[id] = x;
