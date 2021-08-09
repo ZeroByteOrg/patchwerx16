@@ -86,7 +86,7 @@ void init_vera()
 	VERA.address_hi = 0x10; // bank 0, stride = 1
 	for (i=0 ; i < (64*32) ; i++)
 	{
-		VERA.data0 = 32; //todo - make this a #define from the tileset
+		VERA.data0 = 31; //todo - make this a #define from the tileset
 		VERA.data0 = 0x50; // default it to use knob color palette
 	}
 	
@@ -103,14 +103,13 @@ uint8_t system_init()
 {
 	asm("sei");
 	init_vera();
+	asm("cli");
 	
 	// load in the assets....
 	vload("gfx.bin",1,0);			//load widget graphics to VRAM:0x10000 
 	vload("palette.bin",1,0xfa00);	//load palette
-	
 	ym_init();
 	init_widgits();
-	asm("cli");
 	draw_screen();
 	return 1;
 }

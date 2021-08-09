@@ -6,12 +6,14 @@
 #include "mouse.h"
 #include "widgets.h"
 #include "patchwerx16.h"
+#include "ym2151.h"
+#include "callbacks.h"
 
 extern void wait(); // pauses until next IRQ. function is in wait.asm
 
 void draw_screen()
 {
-	widget.draw[0](0);
+	widget.draw[0](0); //<===== this is crashing the program....
 }
 
 // TODO: impliment a routine set_widget() to intialze the basics...
@@ -23,19 +25,18 @@ void draw_screen()
 // triggered to update their appearance or whatever...
 void init_widgits()
 {
-	  widget.onClick[0]	= click_test;
-		 widget.draw[0]	= render_test;
-	 widget.onChange[0]	= mod_test;
-		widget.value[0]	= 16;
-		widget.color[0] = COLOR_BLUE << 4 | COLOR_WHITE;
-		  widget.min[0]	= 0;
-		  widget.max[0] = 31;
-	 widget.vram_loc[0]	= 0x4000 + (40 + 128*4); // col 40, row 4
-			widget.x[0]	= (40 * 8);
-			widget.y[0]	= (4 * 8);
-		   widget.x1[0]	= (40*8)+16;
-		   widget.y1[0]	= (40*8)+16;
-		widget.state[0]	= WS_ENABLED;
+	int16_t id = add_widgit(&YM.voice[0].op[0].tl);
+	int16_t box = add_clickbox(40*8, 4*8, 16, 16);
+	if ((id < 0)||(box < 0)) return;
+	attach_clickbox(box,id);
+//	widget.draw[id] = &render_test;
+	widget.color[id] = 1 << 4; // pre-shift the color palette # into
+	widget.min[id] = 0;       //proper bits for tile mode display
+	widget.max[id] = 0x7f;
+	widget.vram_loc[id] = 0x4000 + (40 + 128*4); // col 40, row 4
+	widget.state[id] = WS_ENABLED;
+//	widget.l_click[id] = &dec_repeat_drag;
+//	widget.r_click[id] = &inc_repeat_drag;
 }
 
 uint8_t patchwerx_init()
@@ -54,11 +55,29 @@ void program_loop()
 		mouse_get();
 		if (click.buttons)
 		{
+			// filter out multi-clicks, priority = L > R > M
+			if (click.buttons & MBUTTON_L)
+				click.buttons = MBUTTON_L;
+			else if (click.buttons & MBUTTON_R)
+				click.buttons = MBUTTON_R;
+			else
+				click.buttons = MBUTTON_M;
+			// tmp: toggle the top-right char's color to indicate clicks...
 			c = ~ vpeek(159);
 			vpoke(c,159);
-			id = find_widget(click.x,click.y);
+			id = get_clickbox(click.x,click.y);
 			if (id >= 0)
-				widget.onClick[id](id);
+				switch (click.buttons) {
+					case MBUTTON_L:
+						widget.l_click[id];
+						break;
+					case MBUTTON_R:
+						widget.r_click[id];
+						break;
+					case MBUTTON_M:	
+						widget.m_click[id];
+						break;
+				}
 		}
 	}
 }

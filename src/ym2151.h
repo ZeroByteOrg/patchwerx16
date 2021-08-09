@@ -60,6 +60,7 @@ typedef struct ym_patchregs {
 } ym_patchregs;
 
 
+extern ym_state YM;
 
 extern void ym_init();
 

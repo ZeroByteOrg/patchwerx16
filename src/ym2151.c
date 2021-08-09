@@ -6,7 +6,7 @@
 uint8_t getReg(const uint8_t p_reg);
 void writeYM(uint8_t a, uint8_t d);
 
-static ym_state YM = {};
+ym_state YM = {};
 
 // exported functions:
 
@@ -45,7 +45,7 @@ void ym_silence(const uint8_t voice)
 void writeYM(uint8_t a, uint8_t d)
 {
 	YMI.address = a;
-	while (YMI.data & 0x80) {} // wait for busy status flag to be clear
+	while ((int8_t)YMI.data < 0) {} // wait for busy status flag to be clear
 	YMI.data = d;
 }
 
