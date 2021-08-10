@@ -1,9 +1,9 @@
-#ifndef __WIDGITS_H__
-#define __WIDGITS_H__
+#ifndef __ZWIDGITS_H__
+#define __ZWIDGITS_H__
 
 #include <stdint.h>
-#include "mouse.h"
-#include "keyboard.h"
+#include "zw_mouse.h"
+#include "zw_keyboard.h"
 
 // KILL THIS WITH FIRE!!!!
 #include "patchwerx16.h" // defines MAX_WIDGITS to actual value

@@ -1,7 +1,7 @@
 #include <stddef.h> // for offsetof()
 #include <stdio.h>
-#include "patchwerx16.h"
-#include "mouse.h"
+#include "patchwerx16.h" // <<===== KILL THIS WITH FIRE!!!
+#include "zw_mouse.h"
 
 #define ZP_RETURNS		0x40	// location for 4-byte Kernal return values
 #define MOUSE_CONFIG	0xFF68	// Kernal API location
@@ -49,17 +49,6 @@ void mouse_get()
 		click.x = mouse.x;
 		click.y = mouse.y;
 	}
-
-/*	TODO: adapt this filter into this routine
-	// filter out multi-clicks, priority = Left, Right, Middle
-	if (m_click.buttons & MBUTTON_L)
-		m_click.buttons = MBUTTON_L;
-	else if (m_click.buttons & MBUTTON_R)
-		m_click.buttons = MBUTTON_R;
-	else
-		m_click.buttons = MBUTTON_M;
-*/
-
 }
 
 void mouse_waitrelease(const uint8_t mask)
@@ -70,5 +59,12 @@ void mouse_waitrelease(const uint8_t mask)
 
 void mouse_init()
 {
+	// make an initial polling of the mouse and set the previous
+	// state to match the current one.
+	mouse_get();
+	mouse.dx = 0;
+	mouse.dy = 0;
+	mouse.previous = mouse.buttons;
+	click.buttons = 0;
 }
 

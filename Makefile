@@ -1,50 +1,37 @@
-TARGET		=	PATCHWERX16.PRG
-PKG			=	patchwerx16.zip
-SYMFILE		=	$(TARGET).sym
+TARGET		= PATCHWERX16.PRG
 
-CFLAGS		=	-t cx16 -O
-LDFLAGS		=	-t cx16 -g -Ln $(SYMFILE)
-EMU			=	box16
+BIN		= build
+SRC		= src
+RES		= res
 
-CC			=	/usr/local/bin/cc65
-LD			=	/usr/local/bin/cl65
-
-SRC		= $(wildcard *.c)
-OBJ		= $(SRC:.c=*.o)
-INC		= $(wildcard *.h)
-ASM		= wait.asm
-#INC	+=	scoreboard.h sound.h
-
-RESOURCE	=
-
-.PHONY: all clean run pkg
-
-all: $(TARGET) $(RESOURCE)
-
-$(TARGET): $(SRC) $(INC)
-	cl65 $(LDFLAGS) -o $@ $(SRC) $(ASM)
-
-install:
-	cp $(TARGET) $(RESOURCE) ~/x16/
+all:
+	@$(MAKE) -C $(SRC)
+	@$(MAKE) -C $(RES)
+	@cp $(SRC)/$(TARGET) $(BIN)/
+	@cp $(RES)/*.BIN $(BIN)/
 
 clean:
-	rm -f *.o *.s *.PRG *.sym *.zip
+	@rm -f $(BIN)/*
+	@$(MAKE) -C $(SRC) clean
+	@$(MAKE) -C $(RES) clean
 
+
+# Build project, and run with box16 emulator
+box16: all
+	@(cd $(BIN) ; box16 -prg $(TARGET) -run)
+
+# Build project and run with official emu, pre-release build of R39
 run: all
-	@$(EMU) -prg $(TARGET) -run -sym $(SYMFILE)
+	@(cd $(BIN) ; x16 -v r39 -prg $(TARGET) -run)
 
-test: test.cc
-	@cc65 -t cx16 -O test.cc
-	@cl65 -t cx16 -o TEST.PRG test.s
-	@x16emu -prg TEST.PRG -debug -run
+# Build project and run with official emu
+run38: all
+	@(cd $(BIN) ; x16-emu -prg $(TARGET) -run)
 
-pkg: $(PKG)
+$(TARGET): $(BIN)/$(TARGET)
 
-$(PKG): $(TARGET) $(RESOURCE)
-	zip $@ $(TARGET) $(RESOURCE)
+patchwerx16: $(BIN)/$(TARGET)
 
-%.s: %.c %.h
-	$(CC)	-o $@ $<
-
-%.o: %.s %.h
-	ca65 -t cx16 -o $@ $<
+$(BIN)/$(TARGET): $(SRC)/$(TARGET)
+	$(MAKE) -C $(SRC)
+	@cp $(SRC)/$(TARGET) $(BIN)/

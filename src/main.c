@@ -27,7 +27,7 @@
 #include <cx16.h>		// kernal access functions
 
 #include "patchwerx16.h"
-#include "widgits.h"
+#include "zwidgits.h"
 #include "ym2151.h"
 //#include "handlers.h"
 

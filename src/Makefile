@@ -28,7 +28,7 @@ install:
 	cp $(TARGET) $(RESOURCE) ~/x16/
 
 clean:
-	rm -f *.o *.s *.PRG *.sym *.zip
+	rm -f *.o *.s *.PRG *.sym *.zip 
 
 run: all
 	@$(EMU) -prg $(TARGET) -run -sym $(SYMFILE)

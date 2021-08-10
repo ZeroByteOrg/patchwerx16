@@ -4,10 +4,10 @@
 #include <stdlib.h>	//abs()
 
 //#define MAXWIDGITS 3
-#include "widgits.h"
 #include "patchwerx16.h"
+#include "zwidgits.h"
 #include "ym2151.h"
-#include "callbacks.h"
+#include "mywidgits.h"
 
 extern void wait(); // pauses until next IRQ. function is in wait.asm
 

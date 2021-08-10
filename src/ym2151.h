@@ -11,6 +11,10 @@
 	#endif
 #endif
 
+#define YMREG_GLOBAL	0x00
+#define YMREG_CHANNEL	0x20
+#define	YMREG_
+
 typedef enum ym_param {
 	// global parameters
 	YMVAL_TEST,YMVAL_KON,YMVAL_NE,YMVAL_NFRQ,YMVAL_CLKA1,YMVAL_CLKA2,
@@ -25,6 +29,18 @@ typedef enum ym_param {
 	YMVAL_DT1,YMVAL_MUL,YMVAL_TL,YMVAL_KS,YMVAL_AR,YMVAL_AMSEN,
 	YMVAL_D1R,YMVAL_DT2,YMVAL_D2R,YMVAL_D1L,YMVAL_RR
 } ym_param;
+
+// THIS IS A STRUCT TO BE USED AS THE ELEMENT TYPE FOR A REG DECODER LUT
+// -- WHICH MAY NOT ACTUALLY BE A NECESSARY DATA STRUCTURE.... ?
+typedef struct ym_param_details {
+	uint8_t base;		//base register address:
+						// 	global = exact,
+						// 	chan   = 0x20,0x28,0x30,0x38
+						//  op     = 0x40,0x60,0x80,0xa0,0xc0,0xe0
+	uint8_t chanshift;	// globals=8, channel=0, opers=8
+	uint8_t opshift;	// globals=8, channel=0, opers=3
+	uint8_t	mask;
+} ym_param_details;
 
 typedef struct ym_interface {
 	uint8_t address, data;
@@ -72,15 +88,15 @@ extern void ym_silence(const uint8_t voice);
 
 
 
-extern void ym_apply_patch(const uint8_t voice, const ym_patch *patch);
+extern void ym_apply_patch(const ym_patchregs *patch, const uint8_t voice);
 // configures voice using a 26-byte patch. Applies to ym_state and real HW.
 
 extern void ym_get_patchregs(const uint8_t voice, const ym_patchregs *regs);
 // configures a 26-byte patch from the specified voice in ym_state.
 
-extern void ym_setparam_global(ym_param param, uint8_t val);
-extern void ym_setparam_chan(ym_param param, uint8_t chan, uint8_t val);
-extern void ym_setparam_oper(ym_param param, uint8_t chan, uint8_t op, uint8_t val);
+extern void ym_setparam_global(ym_param param, uint8_t p_val);
+extern void ym_setparam_chan(ym_param param, uint8_t chan, uint8_t p_val);
+extern void ym_setparam_oper(ym_param param, uint8_t chan, uint8_t op, uint8_t p_val);
 
 
 // maybe these don't need to be exported to the rest of the project?

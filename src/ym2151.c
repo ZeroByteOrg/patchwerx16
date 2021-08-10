@@ -1,14 +1,14 @@
 #include "ym2151.h"
 
-#define YMI (*(ym_interface*) YM_BASE)
-
 // declare hidden functions so the "exported" ones can use them.
 uint8_t getReg(const uint8_t p_reg);
 void writeYM(uint8_t a, uint8_t d);
 
-ym_state YM = {};
+#define YMI (*(ym_interface*) YM_BASE)
 
-// exported functions:
+// Make big-honkin-LUT for YM registers / ranges / shifts / etc.
+
+ym_state YM = {};
 
 void ym_init()
 {
@@ -40,7 +40,59 @@ void ym_silence(const uint8_t voice)
 	}
 }
 
-// hidden functions
+extern void ym_apply_patch(const ym_patchregs *patch, const uint8_t voice);
+// configures voice using a 26-byte patch. Applies to ym_state and real HW.
+
+extern void ym_get_patchregs(const uint8_t voice, const ym_patchregs *regs);
+// configures a 26-byte patch from the specified voice in ym_state.
+
+/*
+ *  >>>>>>>>>> THIS IS WHERE I WAS WORKING <<<<<<<<<<<<<< //
+ *  notes to self: I think I may actually not do it this way, but
+ * just make a few fn's to return pointers to parameters in the ym_state
+ * along with the corresponding enum?
+*/
+
+#pragma warn (unused-param,push,off)
+void ym_setparam_global(ym_param param, uint8_t p_val)
+{
+	// ne, nfrq, lfrq, w, pmd, amd;
+	uint8_t reg, val;
+
+	switch (param) {
+	case YMVAL_NE:
+		val = YM.nfrq | p_val << 7;
+		reg = 0x0f;
+		break;
+	case YMVAL_NFRQ:
+		val = YM.ne | p_val & 0x1f;
+		reg = 0x0f;
+		break;
+	case YMVAL_LFRQ:
+		break;
+	case YMVAL_W:
+		break;
+	case YMVAL_PMD:
+		break;
+	case YMVAL_AMD:
+		break;
+	default:
+		//return 0;
+		return;
+	}
+}
+
+void ym_setparam_chan(ym_param param, uint8_t chan, uint8_t p_val)
+{
+}
+
+void ym_setparam_oper(ym_param param, uint8_t chan, uint8_t op, uint8_t p_val)
+{
+}	
+#pragma warn (unused-param,pop)
+
+
+// hidden functions ---------------------------------------------
 
 void writeYM(uint8_t a, uint8_t d)
 {
@@ -106,41 +158,3 @@ uint8_t getReg(const uint8_t p_reg)
 		return YM.voice[v].op[o].d1l << 4 | YM.voice[v].op[o].rr;
 	}
 }
-
-/*
- *  >>>>>>>>>> THIS IS WHERE I WAS WORKING <<<<<<<<<<<<<< //
- *  notes to self: I think I may actually not do it this way, but
- * just make a few fn's to return pointers to parameters in the ym_state
- * along with the corresponding enum?
-*/
-
-void ym_setparam_global(ym_param param, uint8_t val)
-{
-	// ne, nfrq, lfrq, w, pmd, amd;
-
-	switch (param) {
-	case YMVAL_NE:
-		break;
-	case YMVAL_NFRQ:
-		break;
-	case YMVAL_LFRQ:
-		break;
-	case YMVAL_W:
-		break;
-	case YMVAL_PMD:
-		break;
-	case YMVAL_AMD:
-		break;
-	case default:
-		//return 0;
-		return;
-	}
-}
-
-void ym_setparam_chan(ym_param param, uint8_t chan, uint8_t val)
-{
-}
-
-void ym_setparam_oper(ym_param param, uint8_t chan, uint8_t op, uint8_t val)
-{
-}	

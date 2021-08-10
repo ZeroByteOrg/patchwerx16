@@ -1,6 +1,6 @@
 #include <cx16.h> // vpeek() vpoke()
 
-#include "widgits.h"
+#include "zwidgits.h"
 
 widgit_set widgit = {};
 clickbox_set clickbox = {};
