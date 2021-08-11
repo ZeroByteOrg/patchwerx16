@@ -2,6 +2,7 @@
 #define __YM2151_H__
 
 #include <stdint.h>
+#include <stdarg.h>
 
 #ifndef YM_BASE
 	#ifdef __R38__
@@ -11,14 +12,11 @@
 	#endif
 #endif
 
-#define YMREG_GLOBAL	0x00
-#define YMREG_CHANNEL	0x20
-#define	YMREG_
 
-typedef enum ym_param {
+enum ym_parameters {
 	// global parameters
 	YMVAL_TEST,YMVAL_KON,YMVAL_NE,YMVAL_NFRQ,YMVAL_CLKA1,YMVAL_CLKA2,
-	YMVAL_CLK2,YMVAL_CSM,YMVAL_TRESET,YMVAL_IRQEN,YMVAL_LOADT,YMVAL_LFRQ,
+	YMVAL_CLKB,YMVAL_CSM,YMVAL_TRESET,YMVAL_IRQEN,YMVAL_LOADT,YMVAL_LFRQ,
 	YMVAL_PMD,YMVAL_AMD,YMVAL_CT,YMVAL_W,
 	
 	// per-channel parameters
@@ -27,8 +25,12 @@ typedef enum ym_param {
 	
 	// per-operator parameters
 	YMVAL_DT1,YMVAL_MUL,YMVAL_TL,YMVAL_KS,YMVAL_AR,YMVAL_AMSEN,
-	YMVAL_D1R,YMVAL_DT2,YMVAL_D2R,YMVAL_D1L,YMVAL_RR
-} ym_param;
+	YMVAL_D1R,YMVAL_DT2,YMVAL_D2R,YMVAL_D1L,YMVAL_RR,
+	
+	YMVAL_COUNT // terminator
+};
+
+typedef enum ym_parameters ym_param;
 
 // THIS IS A STRUCT TO BE USED AS THE ELEMENT TYPE FOR A REG DECODER LUT
 // -- WHICH MAY NOT ACTUALLY BE A NECESSARY DATA STRUCTURE.... ?
@@ -65,7 +67,8 @@ typedef struct ym_patch {
 
 typedef struct ym_state {
 	uint8_t
-		ne, nfrq, lfrq, w, pmd, amd;
+		test, kon, ne, nfrq, clka1, clka2, clkb,
+		lfrq, pmd, amd, ct, w;
 	ym_chan
 	   voice[8];
 } ym_state;
@@ -93,6 +96,8 @@ extern void ym_apply_patch(const ym_patchregs *patch, const uint8_t voice);
 
 extern void ym_get_patchregs(const uint8_t voice, const ym_patchregs *regs);
 // configures a 26-byte patch from the specified voice in ym_state.
+
+extern void ym_setparam(ym_param param, uint8_t p_val, ...);
 
 extern void ym_setparam_global(ym_param param, uint8_t p_val);
 extern void ym_setparam_chan(ym_param param, uint8_t chan, uint8_t p_val);

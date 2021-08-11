@@ -1,32 +1,23 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "ym2151.c"
 
-typedef void (*foo_t)(uint8_t);
 
-typedef struct bar_t {
-	foo_t foo[2];
-	foo_t foo2[2];
-} bar_t;
-
-void myfoo(uint8_t arg)
-{
-	printf("myfoo  - %d\n",arg);
-}
-
-void myfoo2(uint8_t arg)
-{
-	arg++;
-	printf("myfoo2 - %d\n",arg);
-}
-
-bar_t bar;
 
 int main()
 {
-	bar.foo[0]  = myfoo;
-	bar.foo2[0] = myfoo2;
-	bar.foo[0](12);
-	bar.foo2[0](12);
+	ym_setparam(YMVAL_AR, 0x1f, 0, 0);
+	ym_setparam(YMVAL_AR, 0x1f, 0, 1);
+	ym_setparam(YMVAL_AR, 0x1f, 0, 2);
+	ym_setparam(YMVAL_AR, 0x1f, 0, 3);
+	ym_setparam(YMVAL_RR, 0x0f, 0, 0);
+	ym_setparam(YMVAL_RR, 0x0f, 0, 1);
+	ym_setparam(YMVAL_RR, 0x0f, 0, 2);
+	ym_setparam(YMVAL_RR, 0x0f, 0, 3);
+	ym_setparam(YMVAL_KC, 0x4a, 0);
+	ym_setparam(YMVAL_KON, 0);
+	ym_setparam(YMVAL_KON, 0x78, 0);
+	
 	while(1) {}
 	return 0;
 }

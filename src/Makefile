@@ -36,7 +36,7 @@ run: all
 test: test.cc
 	@cc65 -t cx16 -O test.cc
 	@cl65 -t cx16 -o TEST.PRG test.s
-	@x16emu -prg TEST.PRG -debug -run
+	@box16 -prg TEST.PRG -run
 
 pkg: $(PKG)
 
