@@ -2,22 +2,20 @@
 
 #include "zwidgits.h"
 
+#include "ym2151.h" // needed for test rig.
+					// zwidgits should not know or care about YM stuff....
+
 widgit_set widgit = {};
 clickbox_set clickbox = {};
 
 #pragma warn (unused-param,push,off)
-void null_clickhandler(uint8_t id)
-{
-}
-
-void null_draw(uint8_t id)
-{
-}
-
-void null_keyhandler(uint8_t id)
+void null_handler(...)
 {
 }
 #pragma warn (unused-param,pop) 
+
+const cb_set null_callbacks = { &null_handler, &null_handler, &null_handler, &null_handler };
+
 
 void widgit_sysinit()
 {
@@ -35,11 +33,7 @@ uint16_t add_widgit(uint8_t *val)
 		return -1;
 	++widgit.count;
 	widgit.value[id] = val;
-	widgit.draw[id] = null_draw;
-	widgit.l_click[id] = null_clickhandler;
-	widgit.r_click[id] = null_clickhandler;
-	widgit.m_click[id] = null_clickhandler;
-	widgit.keypress[id] = null_keyhandler;
+	widgit.cb[id] = (cb_set*)&null_callbacks;
 	widgit.clickbox[id] = MAX_WIDGITS;
 	return id;
 }
@@ -105,6 +99,8 @@ extern int16_t widgits_process_click()
 		c = ~ vpeek(155);
 		vpoke(c,155);
 		if (widgit.state[id] != WS_DISABLED)
+			*(void*)(widgit.cb[id])[CB_CLICK](id);
+/*		
 			switch (click.buttons) {
 				case MBUTTON_L:
 					widgit.l_click[id](id);
@@ -116,6 +112,7 @@ extern int16_t widgits_process_click()
 					widgit.m_click[id](id);
 					break;
 			}
+*/
 	}
 	return id;
 }
@@ -127,14 +124,19 @@ int16_t widgits_process_key()
 
 void set_widgit(uint8_t id, int16_t value)
 {
+	uint8_t prev = *(uint8_t*)widgit.value[id];
+	
 	// clamp the supplied value to uint_8 range
 	if (value < widgit.min[id])
 		value = widgit.min[id];
 	else if (value > widgit.max[id])
 		value = widgit.max[id];
-	*(uint8_t*)widgit.value[id] = value;
-	widgit.draw[id](id);
-	// TODO: update the YM with this value
+	if (value != prev)
+	{
+		*(uint8_t*)widgit.value[id] = value;
+		ym_set_param(YMVAL_TL, value, 0, 0);
+		widgit.draw[id](id);
+	}
 }
 
 #if(0)

@@ -1,18 +1,52 @@
 #ifndef __ZWIDGITS_H__
 #define __ZWIDGITS_H__
 
+/*
+ * Ideas for this library's enhancements:
+ * 
+ * - to get rid of #maxwidgits, turn it into an array of widgit* instead
+ *   of the current struct-of-arrays data dump.
+ * 
+ * - widget classes
+ * 		- zw_register_class(class_id, signed_int *initializer() )
+ * 		- allows user-created widget types
+ * 
+ * - data moved into external structs
+ * 
+ * - abandon the widgit id# system in favor of passing pointers
+ * 
+ * - do the callback functions even need pointers to the widgit
+ *   that called them? I think so - makes it less cumbersome to return
+ *   exit codes that signal whether or not to refresh / call trigger() etc...
+ * 
+ * - get head out of clouds for this particular project though!!!!!
+ * 
+ * -- see above statement
+*/
+	
 #include <stdint.h>
 #include "zw_mouse.h"
 #include "zw_keyboard.h"
 
-// KILL THIS WITH FIRE!!!!
 #include "patchwerx16.h" // defines MAX_WIDGITS to actual value
+// KILL THIS WITH FIRE!!!!
+// zwidgits should NOT need ANY info from
+// the project it's a part of!!!
 
 
 #ifndef MAX_WIDGITS
-#define MAX_WIDGITS	1
+#define MAX_WIDGITS	4
 #endif
 
+enum zw_callback_types {
+	CB_CLICK,
+	CB_KEY,
+	CB_RENDER,
+	CB_TRIGGER,
+	CB_numcallbacks
+};
+
+typedef void* cb_set[CB_numcallbacks];
 
 typedef enum widgit_state {
 	WS_HIDDEN,
@@ -40,18 +74,17 @@ typedef void (*cb_renderer)(uint8_t);
 typedef void (*cb_keyhandler)(uint8_t);
 	// param = widgit index
 
+typedef void (*cb_trigger)(uint8_t);
+	// param = widgit index
+
 typedef struct widgit_set {
 	enum widgit_state state[MAX_WIDGITS];
 	void *value[MAX_WIDGITS];
-	uint8_t color[MAX_WIDGITS];
-	uint16_t vram_loc[MAX_WIDGITS];
 	uint8_t min[MAX_WIDGITS];
 	uint8_t max[MAX_WIDGITS];
-	cb_renderer draw[MAX_WIDGITS];
-	cb_clickhandler l_click[MAX_WIDGITS];
-	cb_clickhandler r_click[MAX_WIDGITS];
-	cb_clickhandler m_click[MAX_WIDGITS];
-	cb_keyhandler keypress[MAX_WIDGITS];
+	uint8_t color[MAX_WIDGITS];
+	uint16_t vram_loc[MAX_WIDGITS];
+	cb_set* cb[MAX_WIDGITS];
 	uint8_t clickbox[MAX_WIDGITS];
 	uint8_t count;
 } widgit_set;
@@ -77,7 +110,5 @@ extern void attach_clickbox (uint8_t boxid, uint8_t widgitid);
 extern int16_t widgits_process_click();
 extern int16_t widgits_process_key();
 extern void set_widgit(uint8_t id, int16_t value);
-//extern void inc_widgit(uint8_t id, uint8_t delta);
-//extern void dec_widgit(uint8_t id, uint8_t delta);
 
 #endif

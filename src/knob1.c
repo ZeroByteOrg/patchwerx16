@@ -1,11 +1,13 @@
 #include <stdint.h>
 #include <stdlib.h>	//abs()
 #include <cx16.h>
+#include <string.h> //memcpy()
 //#include <stdio.h>
 
 #include "patchwerx16.h"
 #include "zwidgits.h"
 #include "mywidgits.h"
+#include "ym2151.h"
 
 
 #define DRAGBOX	4
@@ -15,6 +17,7 @@
 #define KNOB_OFFSET	32
 #define KNOB_COLOR	5 << 4
 
+//void *memcpy(mouse_click *dst, mouse_click *src, size_t);
 
 void dragedit(uint8_t id,int16_t *p_delta,const uint8_t p_button)
 {
@@ -37,13 +40,15 @@ void dragedit(uint8_t id,int16_t *p_delta,const uint8_t p_button)
 void click_test(uint8_t id, int8_t delta)
 {
 	static mouse_click m_click;
-	uint8_t	val;
+	int16_t	val;
 	volatile int16_t count = 0;
 	volatile uint8_t first = 1;
 	volatile uint8_t draggable = 1;
-	m_click = click; // take snapshot of global click struct
+	// take snapshot of global click struct
+	memcpy(&m_click, &click, sizeof(click));
 	
 	do {
+		val = *(uint8_t*)widgit.value[id];
 		mouse_get();
 		// if mouse leaves DRAGBOX, go into drag mode
 		if (draggable) {
@@ -67,13 +72,8 @@ void click_test(uint8_t id, int8_t delta)
 				draggable = 0;
 				count = CLICK_DELAY2;
 			}
-			val = *(uint8_t*)widgit.value[id] + delta;
-			if (val >= widgit.min[id] && val <= widgit.max[id])
-			{
-				*(uint8_t*)widgit.value[id] = val;
-				widgit.draw[id](id);
-			}
-			
+			val += delta;
+			set_widgit(id, val);  // set_widgit clamps value (for now)
 		}
 		else wait();
 	} while (mouse.buttons & m_click.buttons);
@@ -89,7 +89,7 @@ void dec_repeat_drag(uint8_t id)
 	click_test(id, -1);
 }
 
-void render_test(uint8_t id)
+void knob1_draw(uint8_t id)
 {
 	uint8_t color = widgit.color[id];
 	uint8_t value = *(uint8_t*)widgit.value[id];

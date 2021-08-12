@@ -10,27 +10,20 @@
 #include "mywidgits.h"
 
 extern void wait(); // pauses until next IRQ. function is in wait.asm
-
+void playtone();	// delme when done - don't leave crap laying around!!!
 void draw_screen()
 {
-	widgit.draw[0](0); //<===== this is crashing the program....
+	widgit.draw[0](0);
 }
 
-// TODO: impliment a routine set_widgit() to intialze the basics...
-// Params are the very basics: clickbox x,y,w,h
-// It should then point all handler references to null handlers;
-//
-// Thought: Maybe I should move clickboxes outside of the widgit struct...
-// Then it would be possible to have non-clickable widgits that can still be
-// triggered to update their appearance or whatever...
 void setup_widgits()
 {
 	int16_t id, box;
-	id = add_widgit(&YM.voice[0].op[0].tl);
+	id = add_widgit(&YM.oper[0][0][YMVAL_TL]);
 	box = add_clickbox(20*16, 4*16, 16*3, 16);
 	if ((id < 0)||(box < 0)) return;
 	attach_clickbox(box,id);
-	widgit.draw[id] = render_test;
+	widgit.draw[id] = knob1_draw;
 	widgit.color[id] = 1 << 4; // pre-shift the color palette # into
 	widgit.min[id] = 0;       //proper bits for tile mode display
 	widgit.max[id] = 0x7f;
@@ -50,6 +43,7 @@ uint8_t patchwerx_init()
 	widgit_sysinit();
 	setup_widgits();
 	draw_screen();
+	playtone();
 	return 1;
 }
 
@@ -60,10 +54,36 @@ void program_loop()
 	{
 		mouse_get(); // rename to get_input()?
 		
-		// program gets first bite at handling clicks.
-		// if it wants to consume the click and not process the widgits,
-		// then just don't call widgits_process_click();
+		// program gets first bite at handling input.
+		// if it wants to consume the click/key and not process the 
+		// widgits, then just don't call widgits_process_x();
 		if (click.buttons) widgits_process_click();
 		if (kbd.pressed) widgits_process_key();
 	}
 }
+
+void playtone()
+{
+	ym_set_param(YMVAL_L, 1, 0);
+	ym_set_param(YMVAL_R, 1, 0);
+	ym_set_param(YMVAL_CONECT, 7, 0);
+	ym_set_param(YMVAL_FB, 0, 0);
+	ym_set_param(YMVAL_TL, 0x06, 0, 0);
+	ym_set_param(YMVAL_TL, 0x7f, 0, 1);
+	ym_set_param(YMVAL_TL, 0x7f, 0, 2);
+	ym_set_param(YMVAL_TL, 0x7f, 0, 3);
+	ym_set_param(YMVAL_AR, 0x0f, 0, 0);
+	ym_set_param(YMVAL_AR, 0x1f, 0, 0);
+	ym_set_param(YMVAL_AR, 0x1f, 0, 1);
+	ym_set_param(YMVAL_AR, 0x1f, 0, 2);
+	ym_set_param(YMVAL_AR, 0x1f, 0, 3);
+	ym_set_param(YMVAL_RR, 0x0f, 0, 0);
+	ym_set_param(YMVAL_RR, 0x0f, 0, 1);
+	ym_set_param(YMVAL_RR, 0x0f, 0, 2);
+	ym_set_param(YMVAL_RR, 0x0f, 0, 3);
+	ym_set_param(YMVAL_KC, 0x4a, 0);
+	ym_set_param(YMVAL_KON, 0);
+	ym_set_param(YMVAL_KON, 0x78);
+	set_widgit(0,0x7f);
+}
+
